@@ -10,8 +10,8 @@
 **/.DS_Store
 
 # Env files
-frontend/.env
-backend/.env
+apps/mobile/.env
+apps/backend/.env
 
 # Expo
 **/.cache/
