@@ -1,0 +1,21 @@
+
+
+
+# Node
+**/node_modules/
+**/dist/
+**/.expo/
+**/.expo-shared/
+**/.turbo/
+**/.DS_Store
+
+# Env files
+frontend/.env
+backend/.env
+
+# Expo
+**/.cache/
+**/web-build/
+
+# TypeScript
+**/*.tsbuildinfo

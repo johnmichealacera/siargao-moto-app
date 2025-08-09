@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Roles for access control
+enum Role {
+  OWNER
+  RENTER
+}
+
+/// Bike categories allow future expansion to other categories like surfboards/tours
+enum CategoryType {
+  BIKE
+  SURFBOARD
+  VAN
+  TOUR
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  displayName   String?
+  photoUrl      String?
+  role          Role
+  phoneNumber   String?
+  providerId    String?  @unique // Firebase UID or other provider key
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  ownerBikes    Bike[]   @relation("OwnerBikes")
+  renterBookings Booking[] @relation("RenterBookings")
+}
+
+model Bike {
+  id             String   @id @default(uuid())
+  title          String
+  description    String?
+  type           String   // Scooter | Manual | Dirt Bike
+  dailyPrice     Int
+  weeklyPrice    Int?
+  monthlyPrice   Int?
+  latitude       Float
+  longitude      Float
+  photos         String[]
+  isActive       Boolean  @default(true)
+  securityDeposit Int?    // Optional deposit
+  category       Category  @relation(fields: [categoryId], references: [id])
+  categoryId     String
+
+  owner          User     @relation("OwnerBikes", fields: [ownerId], references: [id])
+  ownerId        String
+
+  availabilities Availability[]
+  bookings       Booking[]
+  damageReports  DamageReport[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Category {
+  id        String        @id @default(uuid())
+  name      String        @unique
+  type      CategoryType
+  bikes     Bike[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Availability {
+  id        String   @id @default(uuid())
+  bike      Bike     @relation(fields: [bikeId], references: [id])
+  bikeId    String
+  date      DateTime
+  available Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([bikeId, date], name: "bikeId_date")
+}
+
+model Booking {
+  id          String   @id @default(uuid())
+  bike        Bike     @relation(fields: [bikeId], references: [id])
+  bikeId      String
+  renter      User     @relation("RenterBookings", fields: [renterId], references: [id])
+  renterId    String
+  startDate   DateTime
+  endDate     DateTime
+  totalAmount Int
+  deposit     Int?
+  pickupDropoff Boolean @default(false)
+  status      BookingStatus @default(PENDING)
+  payment     Payment?
+  damageReports DamageReport[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model Payment {
+  id           String   @id @default(uuid())
+  booking      Booking  @relation(fields: [bookingId], references: [id])
+  bookingId    String   @unique
+  provider     PaymentProvider
+  amount       Int
+  currency     String   @default("PHP")
+  status       PaymentStatus @default(PENDING)
+  reference    String?  // Provider ref or manual note
+  createdAt    DateTime @default(now())
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  GCASH
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model DamageReport {
+  id           String   @id @default(uuid())
+  bike         Bike     @relation(fields: [bikeId], references: [id])
+  bikeId       String
+  booking      Booking? @relation(fields: [bookingId], references: [id])
+  bookingId    String?
+  description  String?
+  photosBefore String[]
+  photosAfter  String[]
+  createdAt    DateTime @default(now())
+}
