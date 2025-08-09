@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": { "googleMapsApiKey": "${GOOGLE_MAPS_API_KEY}" }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,24 +25,11 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "config": { "googleMaps": { "apiKey": "${GOOGLE_MAPS_API_KEY}" } }
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-location",
-      "expo-secure-store",
-      "expo-notifications",
-      [
-        "react-native-maps",
-        {
-          "config": { "googleMapsApiKey": "${GOOGLE_MAPS_API_KEY}" }
-        }
-      ]
-    ],
+    "web": { "bundler": "metro", "favicon": "./assets/favicon.png" },
+    "plugins": ["expo-location", "expo-secure-store", "expo-notifications"],
     "extra": {
       "eas": {
         "projectId": "siargao-moto"
